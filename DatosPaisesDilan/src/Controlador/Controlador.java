@@ -45,6 +45,12 @@ public class Controlador implements ActionListener {
         this.vista.btnEliminar.addActionListener(this);
         this.vista.btnGuardar.addActionListener(this);
         this.vista.btnLimpiar.addActionListener(this);
+        this.vista.ComboContinente.addActionListener(new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            filtrarPaisesPorContinente();
+        }
+    });
         //Btnes Ciudad
         this.vista.btnAgregarC.addActionListener(this);
         this.vista.btnConsultarC.addActionListener(this);
@@ -236,6 +242,38 @@ public class Controlador implements ActionListener {
         JOptionPane.showMessageDialog(vista, "Ocurrió un error inesperado: " + e.getMessage());  
     }
 }
+    
+    private void filtrarPaisesPorContinente() {
+        String continenteSeleccionado = String.valueOf(vista.ComboContinente.getSelectedItem());
+
+            if ("Seleccione un Continente:".equals(continenteSeleccionado)) {
+                mostrarTodosLosPaises(); 
+            } else {
+                List<Pais> paises = paisOp.ConsultarPorContinente(continenteSeleccionado);
+                actualizarTablaPaises(paises);
+            }
+}
+
+    private void mostrarTodosLosPaises() {
+        List<Pais> paises = paisOp.ConsultarPorContinente(""); 
+        actualizarTablaPaises(paises);
+    }
+
+    private void actualizarTablaPaises(List<Pais> paises) {
+        DefaultTableModel model = (DefaultTableModel) vista.jTablePais.getModel();
+        model.setRowCount(0); 
+            for (Pais pais : paises) {
+                Object[] row = new Object[5];
+                row[0] = pais.getCodigo();
+                row[1] = pais.getNombre();
+                row[2] = pais.getContinente();
+                row[3] = pais.getPoblacion();
+                row[4] = pais.getTipoGobierno();
+
+                model.addRow(row);
+            }
+    }
+
     public void Consultar1() {
             String codigo = vista.txtCodigoPais.getText();
             if (codigo.isEmpty()) {
@@ -272,9 +310,9 @@ public class Controlador implements ActionListener {
             
             vista.txtCodigoPais.setText(pais.getCodigo());
             vista.txtNombrePais.setText(pais.getNombre());
-            //vista.txtContinentePais.setText(pais.getContinente());
             vista.txtPoblacionPais.setText(String.valueOf(pais.getPoblacion()));
             vista.txtGob.setText(String.valueOf(pais.getTipoGobierno()));
+            vista.ComboContinente.setSelectedItem(pais.getContinente());
         }
     } else {
         JOptionPane.showMessageDialog(vista, "Por favor selecciona un país de la tabla.", "Advertencia", JOptionPane.WARNING_MESSAGE);
@@ -288,7 +326,7 @@ public class Controlador implements ActionListener {
         String poblacionStr = vista.txtPoblacionPais.getText();
         String tipoGob = vista.txtGob.getText();
 
-        // Validar que los campos no estén vacíos
+
         if (codigo.isEmpty() || nombre.isEmpty() || continente.isEmpty() || poblacionStr.isEmpty()) {
             JOptionPane.showMessageDialog(vista, "Todos los campos deben ser llenados.", "ERROR", JOptionPane.ERROR_MESSAGE);
             return;
@@ -297,7 +335,7 @@ public class Controlador implements ActionListener {
         int poblacion;
         int tipGob = 0;
         try {
-            // Validar que el tipo de gobierno sea un número entero
+
             tipGob = Integer.parseInt(tipoGob);
         } catch (NumberFormatException ex) {
             JOptionPane.showMessageDialog(vista, "Ingrese un gobierno válido (0 o 1).", "ERROR", JOptionPane.ERROR_MESSAGE);
@@ -305,14 +343,14 @@ public class Controlador implements ActionListener {
         }
         
         try {
-            // Validar que la población sea un número entero
+
             poblacion = Integer.parseInt(poblacionStr);
         } catch (NumberFormatException e) {
             JOptionPane.showMessageDialog(vista, "La población debe ser un número válido.", "ERROR", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        // Crear un objeto Pais con los datos actualizados
+
         Pais p = new Pais();
         p.setCodigo(codigo);
         p.setNombre(nombre);
@@ -320,23 +358,16 @@ public class Controlador implements ActionListener {
         p.setPoblacion(poblacion);
         p.setTipoGobierno(tipGob);
 
-        // Llamar al método modificar de PaisOperaciones para actualizar en la base de datos
         int r = paisOp.modificar(p);
         if (r == 1) {
             JOptionPane.showMessageDialog(vista, "País modificado con éxito.");
-            limpiar(); // Limpia los campos de texto
-            vista.mostrarDatos(); // Actualiza la tabla
+            limpiar(); 
+            vista.mostrarDatos(); 
         } else {
             JOptionPane.showMessageDialog(vista, "Error al modificar el país.");
-        }
-    }
-
-    void limpiarTabla() {
-        for (int i = 0; i < vista.jTablePais.getRowCount(); i++) {
-            modelo.removeRow(i);
-            i = i - 1;
-        }
+        } 
     }   
+    
     public void Eliminar() {
     try {
         String codigo = vista.txtCodigoPais.getText(); 

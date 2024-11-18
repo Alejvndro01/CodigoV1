@@ -112,28 +112,34 @@ public class PaisOperaciones {
             }
             return paises;
     }
-    
-    public List<Pais> ConsultarPorContinente(String continente) {
-    List<Pais> paises = new ArrayList<>();
-    String sql = "SELECT * FROM pais WHERE continentePais = ?"; 
-    try {
-        con = conectar.getConnection();
-        ps = con.prepareStatement(sql);
-        ps.setString(1, continente);
-        rs = ps.executeQuery();
 
-        while (rs.next()) {
-            Pais pais = new Pais();
-            pais.setCodigo(rs.getString("codigoPais"));
-            pais.setNombre(rs.getString("nombrePais"));
-            pais.setContinente(rs.getString("continentePais"));
-            pais.setPoblacion(rs.getInt("poblacionPais"));
-            pais.setTipoGobierno(rs.getInt("tipoGobierno"));
-            paises.add(pais);
-        }
+    public List<Pais> ConsultarPorContinente(String continente) {
+        List<Pais> paises = new ArrayList<>();
+        String sql;
+            if (continente.isEmpty()) {
+                sql = "SELECT * FROM pais"; 
+            } else {
+                sql = "SELECT * FROM pais WHERE continentePais = ?";
+            }
+        try {
+            con = conectar.getConnection();
+            ps = con.prepareStatement(sql);
+            if (!continente.isEmpty()) {
+                ps.setString(1, continente);
+            }
+            rs = ps.executeQuery();
+                while (rs.next()) {
+                    Pais pais = new Pais();
+                    pais.setCodigo(rs.getString("codigoPais"));
+                    pais.setNombre(rs.getString("nombrePais"));
+                    pais.setContinente(rs.getString("continentePais"));
+                    pais.setPoblacion(rs.getInt("poblacionPais"));
+                    pais.setTipoGobierno(rs.getInt("tipoGobierno"));
+                    paises.add(pais);
+                }
         } catch (SQLException e) {
-        JOptionPane.showMessageDialog(null, "Error al consultar los países: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-    }
-    return paises;
+            JOptionPane.showMessageDialog(null, "Error al consultar los países: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+        return paises;
 }
 }
